@@ -1,221 +1,193 @@
-const initialMarkerPositions = {
-    m1: 20, 
-    m2: 40, 
-    m3: 60, 
-    m4: 80  
-};
-
-let currentTabStates = {
-    tab1: { ...initialMarkerPositions },
-    tab2: { ...initialMarkerPositions },
-    tab3: { ...initialMarkerPositions }
-};
-
-const markersData = [
-    { id: 'm1', text: 'Guardian of Religious Tradition', color: 'm1' },
-    { id: 'm2', text: 'Cultural Patrimony Promoter', color: 'm2' },
-    { id: 'm3', text: 'Spiritual Holistic', color: 'm3' },
-    { id: 'm4', text: 'Total Artification', color: 'm4' }
-];
-
-function generateChartHTML(tabId, isDraggable = true, isComparison = false) {
-    let dragClass = isDraggable ? 'is-draggable' : '';
-    let markersHTML = markersData.map(marker => `
-        <div class="marker-group ${dragClass} marker-${marker.id}" data-marker-id="${marker.id}">
-            <div class="marker-tooltip">${marker.text}</div>
-            <div class="marker-diamond marker-color-${marker.color}"></div>
-        </div>
-    `).join('');
-
-    return `
-        <div class="chart-wrapper" data-tab-id="${tabId}">
-            <div class="line-axis"></div>
-            <span class="axis-label left">Religious Discourse</span>
-            <span class="axis-label right">Secular Discourse</span>
-            ${markersHTML}
-        </div>
-    `;
+/* Modernised View with +50% Size Increase */
+:root {
+    --marker-size: 30px; /* Increased from 20px */
+    --line-thickness: 6px; /* Increased from 4px */
+    --color-m1: #10b981; 
+    --color-m2: #3b82f6; 
+    --color-m3: #8b5cf6; 
+    --color-m4: #ef4444; 
+    --bg-color: #f1f5f9;
+    --surface-color: #ffffff;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --axis-color: #cbd5e1;
+    --font-family: 'Inter', sans-serif;
+    --border-radius: 18px; /* Rounded corners for modern feel */
 }
 
-function initLegend() {
-    const legendContainer = document.getElementById('global-legend');
-    legendContainer.innerHTML = markersData.map(marker => `
-        <div class="legend-item">
-            <div class="legend-diamond marker-color-${marker.color}"></div>
-            <span>${marker.text}</span>
-        </div>
-    `).join('');
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    font-family: var(--font-family);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-function initCharts() {
-    document.getElementById('interactive-chart-tab1').innerHTML = generateChartHTML('tab1', false); // Static
-    document.getElementById('interactive-chart-tab2').innerHTML = generateChartHTML('tab2', true);  // Interactive
-    document.getElementById('interactive-chart-tab3').innerHTML = generateChartHTML('tab3', true);  // Interactive
-    
-    initLegend();
-    
-    applyMarkersPositions('tab1');
-    applyMarkersPositions('tab2');
-    applyMarkersPositions('tab3');
-    
-    initDragAndDrop();
+h1#main-title {
+    text-align: center;
+    margin: 60px 30px 45px;
+    font-size: 3rem; /* +50% larger */
+    font-weight: 600;
+    color: var(--text-main);
+    letter-spacing: -0.02em;
 }
 
-function applyMarkersPositions(tabId) {
-    const positions = currentTabStates[tabId];
-    const container = document.querySelector(`.chart-wrapper[data-tab-id="${tabId}"]`);
-    
-    if (!container) return;
-
-    for (const markerId in positions) {
-        const markerElement = container.querySelector(`.marker-${markerId}`);
-        if (markerElement) {
-            markerElement.style.left = `${positions[markerId]}%`;
-        }
-    }
+.dashboard-container {
+    width: 100%;
+    max-width: 1800px; /* Large professional dashboard width */
+    background: var(--surface-color);
+    border-radius: var(--border-radius);
+    box-shadow: 0 15px 35px -8px rgb(0 0 0 / 0.05), 0 12px 15px -9px rgb(0 0 0 / 0.01);
+    margin-bottom: 60px;
+    display: flex;
+    flex-direction: column;
 }
 
-function updateComparisonStack() {
-    const stackContainer = document.getElementById('comparison-stack');
-    
-    const referenceLinesHTML = markersData.map(marker => {
-        const pos = currentTabStates['tab1'][marker.id];
-        return `<div class="reference-line" style="left: ${pos}%; border-color: var(--color-${marker.color});"></div>`;
-    }).join('');
-
-    const createComparisonBlock = (tabId, title) => {
-        return `
-            <div class="comparison-block">
-                <span class="comparison-title" style="font-size: 1.35rem; margin-bottom: 0;">${title}</span>
-                ${generateChartHTML(tabId + '-compare', false, true)}
-            </div>
-        `;
-    };
-
-    const blocksHTML = 
-        createComparisonBlock('tab1', "Ideal types setting") +
-        createComparisonBlock('tab2', "Islamic context") +
-        createComparisonBlock('tab3', "Interfaith context");
-
-    stackContainer.innerHTML = referenceLinesHTML + blocksHTML;
-    
-    copyPositionsForComparison('tab1', 'tab1-compare');
-    copyPositionsForComparison('tab2', 'tab2-compare');
-    copyPositionsForComparison('tab3', 'tab3-compare');
+.tabs {
+    display: flex;
+    border-bottom: 2px solid #e2e8f0;
+    background-color: #f8fafc;
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
 }
 
-function copyPositionsForComparison(sourceTabId, targetTabId) {
-    const positions = currentTabStates[sourceTabId];
-    const container = document.querySelector(`.chart-wrapper[data-tab-id="${targetTabId}"]`);
-    if (!container) return;
-    
-    for (const markerId in positions) {
-        const markerElement = container.querySelector(`.marker-${markerId}`);
-        if (markerElement) {
-            markerElement.style.left = `${positions[markerId]}%`;
-        }
-    }
+.tab-button {
+    background-color: transparent;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 27px 36px;
+    font-size: 1.5rem; /* +50% larger */
+    font-weight: 500;
+    color: var(--text-muted);
+    flex-grow: 1;
+    transition: all 0.2s ease;
+    position: relative;
 }
 
-function openTab(tabName, elmnt) {
-    let tabcontent = document.getElementsByClassName("tab-content");
-    for (let i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
-        tabcontent[i].classList.remove("active");
-    }
-    let tablinks = document.getElementsByClassName("tab-button");
-    for (let i = 0; i < tablinks.length; i++) {
-        tablinks[i].classList.remove("active");
-    }
-    
-    document.getElementById(tabName).style.display = "block";
-    void document.getElementById(tabName).offsetWidth;
-    document.getElementById(tabName).classList.add("active");
-    elmnt.classList.add("active");
-    
-    if (tabName === 'tab4') {
-        updateComparisonStack();
-    }
+.tab-button.active {
+    color: var(--color-m2);
+    background-color: var(--surface-color);
+    font-weight: 600;
 }
 
-let isDragging = false;
-let dragStartX = 0;
-let currentMarkerGroup = null;
-let chartRect = null;
-let currentPercentLeft = 0;
-let currentTabId = null;
-let currentMarkerId = null;
-
-function initDragAndDrop() {
-    const draggableMarkers = document.querySelectorAll('.marker-group.is-draggable');
-    
-    draggableMarkers.forEach(marker => {
-        marker.addEventListener('mousedown', dragStart);
-        marker.addEventListener('touchstart', dragStart, { passive: false });
-    });
+.tab-button.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: var(--color-m2);
 }
 
-function dragStart(e) {
-    if(e.type === 'mousedown' && e.button !== 0) return; 
-    e.preventDefault();
-    
-    isDragging = true;
-    currentMarkerGroup = e.currentTarget;
-    currentMarkerGroup.classList.add('dragging');
-    
-    chartRect = currentMarkerGroup.parentElement.getBoundingClientRect();
-    currentTabId = currentMarkerGroup.parentElement.dataset.tabId;
-    currentMarkerId = currentMarkerGroup.dataset.markerId;
-    
-    if (e.type === 'touchstart') {
-        dragStartX = e.touches[0].clientX;
-    } else {
-        dragStartX = e.clientX;
-    }
-    
-    currentPercentLeft = parseFloat(currentMarkerGroup.style.left || currentTabStates[currentTabId][currentMarkerId]);
-    
-    document.addEventListener('mousemove', dragMove);
-    document.addEventListener('touchmove', dragMove, { passive: false });
-    
-    document.addEventListener('mouseup', dragEnd);
-    document.addEventListener('touchend', dragEnd);
+.tab-content {
+    display: none;
+    padding: 60px;
+    min-height: 375px; 
+    animation: fadeIn 0.3s ease;
 }
 
-function dragMove(e) {
-    if (!isDragging) return;
-    e.preventDefault();
-    
-    let clientX;
-    if (e.type === 'touchmove') {
-        clientX = e.touches[0].clientX;
-    } else {
-        clientX = e.clientX;
-    }
-    
-    const deltaX = clientX - dragStartX;
-    const deltaPercent = (deltaX / chartRect.width) * 100;
-    
-    let newPercent = currentPercentLeft + deltaPercent;
-    newPercent = Math.max(0, Math.min(100, newPercent));
-    
-    currentMarkerGroup.style.left = `${newPercent}%`;
-    currentTabStates[currentTabId][currentMarkerId] = newPercent;
+.tab-content.active { display: block; }
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-function dragEnd(e) {
-    if (!isDragging) return;
-    isDragging = false;
-    
-    currentMarkerGroup.classList.remove('dragging');
-    
-    document.removeEventListener('mousemove', dragMove);
-    document.removeEventListener('touchmove', dragMove);
-    document.removeEventListener('mouseup', dragEnd);
-    document.removeEventListener('touchend', dragEnd);
+.chart-wrapper {
+    position: relative;
+    height: 180px; 
+    margin: 60px auto 0;
+    width: 85%;
+    box-sizing: border-box;
+    user-select: none;
 }
 
-window.onload = function() {
-    initCharts();
-    document.getElementsByClassName("tab-button")[0].click();
-};
+.line-axis {
+    position: absolute;
+    top: 90px; 
+    left: 0;
+    width: 100%;
+    height: var(--line-thickness);
+    background-color: var(--axis-color);
+}
+
+.axis-label {
+    position: absolute;
+    top: 90px;
+    transform: translateY(-50%);
+    font-weight: 600;
+    font-size: 1.5rem; /* Large labels */
+    color: var(--text-muted);
+}
+
+.axis-label.left { left: -240px; width: 210px; text-align: right; }
+.axis-label.right { right: -240px; width: 210px; text-align: left; }
+
+/* Marker Diamond Styling */
+.marker-diamond {
+    width: var(--marker-size);
+    height: var(--marker-size);
+    transform: rotate(45deg);
+    box-shadow: 0 6px 9px -2px rgb(0 0 0 / 0.2);
+    border: 3px solid #fff;
+}
+
+/* Vertical Flashy Tooltip */
+.marker-tooltip {
+    position: absolute;
+    bottom: 52px;
+    white-space: nowrap;
+    background: linear-gradient(90deg, #ff00cc, #3333ff, #00ffff);
+    background-size: 200% 200%;
+    animation: gradientMove 2s ease infinite;
+    color: #ffffff;
+    padding: 9px 18px;
+    border-radius: 12px;
+    font-size: 1.425rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    box-shadow: 0 0 22px rgba(255, 0, 204, 0.6);
+}
+
+.legend-container {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    padding: 30px;
+    background-color: #f8fafc;
+    border-top: 2px solid #e2e8f0;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 1.425rem;
+}
+
+/* Comparison View Styling */
+#comparison-stack {
+    position: relative;
+    width: 85%;
+    margin: 0 auto;
+}
+
+.reference-line {
+    position: absolute;
+    top: 45px; 
+    bottom: 45px;
+    border-left: 3px dashed;
+    opacity: 0.5;
+}
+
+.comparison-title {
+    font-weight: 600;
+    font-size: 1.65rem;
+    color: var(--text-muted);
+    text-align: center;
+}
