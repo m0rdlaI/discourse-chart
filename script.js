@@ -2,7 +2,6 @@ const initialMarkerPositions = {
     m1: 20, m2: 40, m3: 60, m4: 80  
 };
 
-// Updated internal states to hold marker positions per tab
 let currentTabStates = {
     tab1: { ...initialMarkerPositions },
     tab2: { ...initialMarkerPositions },
@@ -35,7 +34,6 @@ function generateChartHTML(tabId, isDraggable = true) {
     `;
 }
 
-// Fixed the naming in the Comparison stack update logic
 function updateComparisonStack() {
     const stackContainer = document.getElementById('comparison-stack');
     
@@ -53,7 +51,6 @@ function updateComparisonStack() {
         `;
     };
 
-    // Corrected labels for comparison stack blocks
     const blocksHTML = 
         createComparisonBlock('tab1', "Ideal types setting") +
         createComparisonBlock('tab2', "Islamic context") +
@@ -61,7 +58,6 @@ function updateComparisonStack() {
 
     stackContainer.innerHTML = referenceLinesHTML + blocksHTML;
     
-    // Ensure correct positions are mapped to comparison clones
     copyPositionsForComparison('tab1', 'tab1-compare');
     copyPositionsForComparison('tab2', 'tab2-compare');
     copyPositionsForComparison('tab3', 'tab3-compare');
@@ -101,7 +97,6 @@ function openTab(tabName, elmnt) {
     }
 }
 
-// Drag logic remains unchanged but references the dashboard container
 let isDragging = false;
 let dragStartX = 0;
 let currentMarkerGroup = null;
@@ -150,6 +145,13 @@ function dragEnd() {
     currentMarkerGroup.classList.remove('dragging');
     document.removeEventListener('mousemove', dragMove);
     document.removeEventListener('touchmove', dragMove);
+}
+
+function initCharts() {
+    document.getElementById('interactive-chart-tab1').innerHTML = generateChartHTML('tab1', false); 
+    document.getElementById('interactive-chart-tab2').innerHTML = generateChartHTML('tab2', true);  
+    document.getElementById('interactive-chart-tab3').innerHTML = generateChartHTML('tab3', true);  
+    initDragAndDrop();
 }
 
 window.onload = function() {
