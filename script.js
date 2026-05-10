@@ -1,5 +1,8 @@
 const initialMarkerPositions = {
-    m1: 20, m2: 40, m3: 60, m4: 80  
+    m1: 20, 
+    m2: 40, 
+    m3: 60, 
+    m4: 80  
 };
 
 let currentTabStates = {
@@ -15,7 +18,7 @@ const markersData = [
     { id: 'm4', text: 'Total Artification', color: 'm4' }
 ];
 
-function generateChartHTML(tabId, isDraggable = true) {
+function generateChartHTML(tabId, isDraggable = true, isComparison = false) {
     let dragClass = isDraggable ? 'is-draggable' : '';
     let markersHTML = markersData.map(marker => `
         <div class="marker-group ${dragClass} marker-${marker.id}" data-marker-id="${marker.id}">
@@ -34,6 +37,44 @@ function generateChartHTML(tabId, isDraggable = true) {
     `;
 }
 
+function initLegend() {
+    const legendContainer = document.getElementById('global-legend');
+    legendContainer.innerHTML = markersData.map(marker => `
+        <div class="legend-item">
+            <div class="legend-diamond marker-color-${marker.color}"></div>
+            <span>${marker.text}</span>
+        </div>
+    `).join('');
+}
+
+function initCharts() {
+    document.getElementById('interactive-chart-tab1').innerHTML = generateChartHTML('tab1', false); 
+    document.getElementById('interactive-chart-tab2').innerHTML = generateChartHTML('tab2', true);  
+    document.getElementById('interactive-chart-tab3').innerHTML = generateChartHTML('tab3', true);  
+    
+    initLegend();
+    
+    applyMarkersPositions('tab1');
+    applyMarkersPositions('tab2');
+    applyMarkersPositions('tab3');
+    
+    initDragAndDrop();
+}
+
+function applyMarkersPositions(tabId) {
+    const positions = currentTabStates[tabId];
+    const container = document.querySelector(`.chart-wrapper[data-tab-id="${tabId}"]`);
+    
+    if (!container) return;
+
+    for (const markerId in positions) {
+        const markerElement = container.querySelector(`.marker-${markerId}`);
+        if (markerElement) {
+            markerElement.style.left = `${positions[markerId]}%`;
+        }
+    }
+}
+
 function updateComparisonStack() {
     const stackContainer = document.getElementById('comparison-stack');
     
@@ -44,13 +85,14 @@ function updateComparisonStack() {
 
     const createComparisonBlock = (tabId, title) => {
         return `
-            <div class="comparison-block" style="padding-bottom: 30px; border-bottom: 2px solid #f1f5f9;">
-                <span class="comparison-title" style="font-size: 1.35rem; margin-bottom: 10px; display: block;">${title}</span>
-                ${generateChartHTML(tabId + '-compare', false)}
+            <div class="comparison-block">
+                <span class="comparison-title" style="font-size: 1.35rem; margin-bottom: 0;">${title}</span>
+                ${generateChartHTML(tabId + '-compare', false, true)}
             </div>
         `;
     };
 
+    // Use the correctly updated titles for the generated comparison blocks
     const blocksHTML = 
         createComparisonBlock('tab1', "Ideal types setting") +
         createComparisonBlock('tab2', "Islamic context") +
@@ -107,6 +149,7 @@ let currentMarkerId = null;
 
 function initDragAndDrop() {
     const draggableMarkers = document.querySelectorAll('.marker-group.is-draggable');
+    
     draggableMarkers.forEach(marker => {
         marker.addEventListener('mousedown', dragStart);
         marker.addEventListener('touchstart', dragStart, { passive: false });
@@ -116,52 +159,64 @@ function initDragAndDrop() {
 function dragStart(e) {
     if(e.type === 'mousedown' && e.button !== 0) return; 
     e.preventDefault();
+    
     isDragging = true;
     currentMarkerGroup = e.currentTarget;
     currentMarkerGroup.classList.add('dragging');
+    
     chartRect = currentMarkerGroup.parentElement.getBoundingClientRect();
     currentTabId = currentMarkerGroup.parentElement.dataset.tabId;
     currentMarkerId = currentMarkerGroup.dataset.markerId;
-    dragStartX = (e.type === 'touchstart') ? e.touches[0].clientX : e.clientX;
+    
+    if (e.type === 'touchstart') {
+        dragStartX = e.touches[0].clientX;
+    } else {
+        dragStartX = e.clientX;
+    }
+    
     currentPercentLeft = parseFloat(currentMarkerGroup.style.left || currentTabStates[currentTabId][currentMarkerId]);
+    
     document.addEventListener('mousemove', dragMove);
     document.addEventListener('touchmove', dragMove, { passive: false });
+    
     document.addEventListener('mouseup', dragEnd);
     document.addEventListener('touchend', dragEnd);
 }
 
 function dragMove(e) {
     if (!isDragging) return;
-    const clientX = (e.type === 'touchmove') ? e.touches[0].clientX : e.clientX;
-    const deltaPercent = ((clientX - dragStartX) / chartRect.width) * 100;
-    let newPercent = Math.max(0, Math.min(100, currentPercentLeft + deltaPercent));
+    e.preventDefault();
+    
+    let clientX;
+    if (e.type === 'touchmove') {
+        clientX = e.touches[0].clientX;
+    } else {
+        clientX = e.clientX;
+    }
+    
+    const deltaX = clientX - dragStartX;
+    const deltaPercent = (deltaX / chartRect.width) * 100;
+    
+    let newPercent = currentPercentLeft + deltaPercent;
+    newPercent = Math.max(0, Math.min(100, newPercent));
+    
     currentMarkerGroup.style.left = `${newPercent}%`;
     currentTabStates[currentTabId][currentMarkerId] = newPercent;
 }
 
-function dragEnd() {
+function dragEnd(e) {
     if (!isDragging) return;
     isDragging = false;
+    
     currentMarkerGroup.classList.remove('dragging');
+    
     document.removeEventListener('mousemove', dragMove);
     document.removeEventListener('touchmove', dragMove);
-}
-
-function initCharts() {
-    document.getElementById('interactive-chart-tab1').innerHTML = generateChartHTML('tab1', false); 
-    document.getElementById('interactive-chart-tab2').innerHTML = generateChartHTML('tab2', true);  
-    document.getElementById('interactive-chart-tab3').innerHTML = generateChartHTML('tab3', true);  
-    initDragAndDrop();
+    document.removeEventListener('mouseup', dragEnd);
+    document.removeEventListener('touchend', dragEnd);
 }
 
 window.onload = function() {
     initCharts();
     document.getElementsByClassName("tab-button")[0].click();
-    const legendContainer = document.getElementById('global-legend');
-    legendContainer.innerHTML = markersData.map(marker => `
-        <div class="legend-item">
-            <div class="legend-diamond marker-color-${marker.color}"></div>
-            <span>${marker.text}</span>
-        </div>
-    `).join('');
 };
