@@ -16,7 +16,8 @@
       <button class="tab-button" onclick="openTab('tab1', this)">Ideal types setting</button>
       <button class="tab-button" onclick="openTab('tab2', this)">Islamic context</button>
       <button class="tab-button" onclick="openTab('tab3', this)">Interfaith context</button>
-      <button class="tab-button" onclick="openTab('tab4', this)" id="comparison-tab-button">Comparison</button>
+      <button class="tab-button" onclick="openTab('tab4', this)">Secular context</button>
+      <button class="tab-button" onclick="openTab('tab5', this)" id="comparison-tab-button">Comparison</button>
     </div>
 
     <div id="tab1" class="tab-content">
@@ -35,6 +36,11 @@
     </div>
 
     <div id="tab4" class="tab-content">
+        <span class="comparison-title">Secular context</span>
+        <div id="interactive-chart-tab4"></div>
+    </div>
+
+    <div id="tab5" class="tab-content">
         <span class="comparison-title" style="text-align: center; display: block; margin-bottom: 30px;">Side-by-Side Comparison</span>
         <div id="comparison-stack"></div>
     </div>
