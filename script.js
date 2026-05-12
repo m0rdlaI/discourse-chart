@@ -5,10 +5,12 @@ const initialMarkerPositions = {
     m4: 80  
 };
 
+// Added tab4 state
 let currentTabStates = {
     tab1: { ...initialMarkerPositions },
     tab2: { ...initialMarkerPositions },
-    tab3: { ...initialMarkerPositions }
+    tab3: { ...initialMarkerPositions },
+    tab4: { ...initialMarkerPositions }
 };
 
 const markersData = [
@@ -51,12 +53,14 @@ function initCharts() {
     document.getElementById('interactive-chart-tab1').innerHTML = generateChartHTML('tab1', false); 
     document.getElementById('interactive-chart-tab2').innerHTML = generateChartHTML('tab2', true);  
     document.getElementById('interactive-chart-tab3').innerHTML = generateChartHTML('tab3', true);  
+    document.getElementById('interactive-chart-tab4').innerHTML = generateChartHTML('tab4', true);  
     
     initLegend();
     
     applyMarkersPositions('tab1');
     applyMarkersPositions('tab2');
     applyMarkersPositions('tab3');
+    applyMarkersPositions('tab4');
     
     initDragAndDrop();
 }
@@ -92,17 +96,19 @@ function updateComparisonStack() {
         `;
     };
 
-    // Use the correctly updated titles for the generated comparison blocks
+    // Added the new tab to the comparison layout
     const blocksHTML = 
         createComparisonBlock('tab1', "Ideal types setting") +
         createComparisonBlock('tab2', "Islamic context") +
-        createComparisonBlock('tab3', "Interfaith context");
+        createComparisonBlock('tab3', "Interfaith context") +
+        createComparisonBlock('tab4', "Secular context");
 
     stackContainer.innerHTML = referenceLinesHTML + blocksHTML;
     
     copyPositionsForComparison('tab1', 'tab1-compare');
     copyPositionsForComparison('tab2', 'tab2-compare');
     copyPositionsForComparison('tab3', 'tab3-compare');
+    copyPositionsForComparison('tab4', 'tab4-compare');
 }
 
 function copyPositionsForComparison(sourceTabId, targetTabId) {
@@ -134,7 +140,8 @@ function openTab(tabName, elmnt) {
     document.getElementById(tabName).classList.add("active");
     elmnt.classList.add("active");
     
-    if (tabName === 'tab4') {
+    // Comparison is now tab5
+    if (tabName === 'tab5') {
         updateComparisonStack();
     }
 }
