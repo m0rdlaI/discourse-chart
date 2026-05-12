@@ -5,7 +5,6 @@ const initialMarkerPositions = {
     m4: 80  
 };
 
-// Added tab4 state
 let currentTabStates = {
     tab1: { ...initialMarkerPositions },
     tab2: { ...initialMarkerPositions },
@@ -50,7 +49,8 @@ function initLegend() {
 }
 
 function initCharts() {
-    document.getElementById('interactive-chart-tab1').innerHTML = generateChartHTML('tab1', false); 
+    // All 4 primary tabs are now fully interactive (isDraggable = true)
+    document.getElementById('interactive-chart-tab1').innerHTML = generateChartHTML('tab1', true); 
     document.getElementById('interactive-chart-tab2').innerHTML = generateChartHTML('tab2', true);  
     document.getElementById('interactive-chart-tab3').innerHTML = generateChartHTML('tab3', true);  
     document.getElementById('interactive-chart-tab4').innerHTML = generateChartHTML('tab4', true);  
@@ -82,6 +82,7 @@ function applyMarkersPositions(tabId) {
 function updateComparisonStack() {
     const stackContainer = document.getElementById('comparison-stack');
     
+    // The reference lines trace from the top to bottom using Tab 1's position as the benchmark
     const referenceLinesHTML = markersData.map(marker => {
         const pos = currentTabStates['tab1'][marker.id];
         return `<div class="reference-line" style="left: ${pos}%; border-color: var(--color-${marker.color});"></div>`;
@@ -96,7 +97,6 @@ function updateComparisonStack() {
         `;
     };
 
-    // Added the new tab to the comparison layout
     const blocksHTML = 
         createComparisonBlock('tab1', "Ideal types setting") +
         createComparisonBlock('tab2', "Islamic context") +
@@ -140,7 +140,7 @@ function openTab(tabName, elmnt) {
     document.getElementById(tabName).classList.add("active");
     elmnt.classList.add("active");
     
-    // Comparison is now tab5
+    // The comparison tab is now explicitly tab5
     if (tabName === 'tab5') {
         updateComparisonStack();
     }
